@@ -51,4 +51,4 @@ docker compose down -v       # Para los contenedores y borra el volumen de datos
 ## Captura de pantalla
 
 <!-- Sustituye esta línea por la imagen real, por ejemplo: -->
-<!-- ![Resultado en el navegador](captura.png) -->
+![Resultado en el navegador](captura.png)
