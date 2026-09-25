@@ -52,3 +52,43 @@ docker compose down -v       # Para los contenedores y borra el volumen de datos
 
 <!-- Sustituye esta línea por la imagen real, por ejemplo: -->
 ![Resultado en el navegador](captura.png)
+
+
+--------------------------------------------
+
+## Proceso de desarrollo
+
+Este es mi primer proyecto usando Docker, así que fui avanzando paso a paso, entendiendo cada pieza antes de pasar a la siguiente.
+
+### 1. Definir la arquitectura
+
+Decidí separar el proyecto en tres contenedores: uno para nginx (servidor web), uno para PHP-FPM (ejecuta el código) y uno para MySQL (base de datos), en vez de instalarlo todo junto como en XAMPP. Cada uno vive en su propia carpeta dentro del repositorio (`nginx/`, `php/`, `src/`) para mantener el proyecto organizado.
+
+### 2. `docker-compose.yml` — el archivo que lo organiza todo
+
+Fue el primer archivo que escribí, porque describe qué contenedores existen y cómo se conectan entre sí. Definí los tres servicios (`web`, `php`, `db`), el mapeo de puertos (`8080` de mi ordenador al `80` del contenedor de nginx), los volúmenes para que mi código en `src/` fuera visible dentro del contenedor sin copiarlo a mano, y las variables de entorno de MySQL (usuario, contraseña, nombre de la base de datos) para que se autoconfigure al arrancar.
+
+### 3. `php/Dockerfile` — construir mi propio PHP
+
+La imagen oficial de PHP no trae de fábrica lo necesario para hablar con MySQL, así que creé un `Dockerfile` propio: partí de `php:8.3-fpm` y añadí las extensiones `pdo` y `pdo_mysql`, que son las que permiten usar la clase `PDO` en el código para conectarse a la base de datos. Es la primera vez que construyo una imagen en vez de usar una ya hecha.
+
+### 4. `nginx/default.conf` — reenviar las peticiones PHP
+
+Configuré nginx para que, cuando detecte que se pide un archivo `.php`, no intente servirlo directamente (no sabe ejecutar PHP), sino que la reenvíe con `fastcgi_pass php:9000` al contenedor `php`, usando el nombre del servicio como dirección dentro de la red interna de Docker.
+
+### 5. `src/index.php` — comprobar que todo funciona de verdad
+
+Escribí un script que se conecta a la base de datos con PDO, crea una tabla `visitas` si no existía, guarda un registro cada vez que se carga la página y muestra el total. Lo hice así, y no solo un "Hola mundo", para tener una prueba real de que los tres contenedores se comunican entre sí (nginx → PHP → MySQL).
+
+### 6. Probarlo en local antes de subir nada
+
+Con `docker compose up -d` levanté los tres contenedores a la vez y comprobé en `http://localhost:8080` que la página cargaba y el contador de visitas aumentaba en cada recarga, para detectar errores antes de subir el código.
+
+### 7. Ir guardando el progreso con Git
+
+Fui haciendo un commit por cada pieza completada (primero el `docker-compose.yml`, luego el Dockerfile, luego la configuración de nginx, luego el PHP, y por último la documentación), en vez de un único commit final con todo junto.
+
+### 8. Subirlo a GitHub
+
+Creé un repositorio público, lo conecté al local con `git remote add origin` y subí todo con `git push`, autenticándome con un token de acceso personal.
+
