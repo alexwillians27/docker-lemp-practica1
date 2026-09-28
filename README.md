@@ -17,6 +17,7 @@ Docker, aislado y desechable.
 ```bash
 git clone <URL-de-este-repositorio>
 cd <carpeta-del-repositorio>
+cp .env.example .env        # Configurar contraseñas (o copiar desde la plantilla)
 docker compose up -d
 ```
 
@@ -31,6 +32,9 @@ correctamente.
 
 ```
 .
+├── .env                   # Variables de entorno y contraseñas (ignorado por Git)
+├── .env.example           # Plantilla pública de variables de entorno
+├── .gitignore             # Reglas de exclusión de Git (protege el .env)
 ├── docker-compose.yml     # Define los tres servicios y su conexión
 ├── php/
 │   └── Dockerfile         # Imagen PHP 8.3-FPM con extensión pdo_mysql
@@ -58,11 +62,11 @@ docker compose down -v       # Para los contenedores y borra el volumen de datos
 
 ## Proceso de desarrollo
 
-Este es mi primer proyecto usando Docker, así que fui avanzando paso a paso, entendiendo cada pieza antes de pasar a la siguiente.
+Este es mi primer proyecto usando Docker, así que fui avanzando paso a paso, entendiendo cada parte antes de pasar a la siguiente.
 
 ### 1. Definir la arquitectura
 
-Decidí separar el proyecto en tres contenedores: uno para nginx (servidor web), uno para PHP-FPM (ejecuta el código) y uno para MySQL (base de datos), en vez de instalarlo todo junto como en XAMPP. Cada uno vive en su propia carpeta dentro del repositorio (`nginx/`, `php/`, `src/`) para mantener el proyecto organizado.
+Tuve que separar el proyecto en tres contenedores: uno para nginx (servidor web), uno para PHP-FPM (ejecuta el código) y uno para MySQL (base de datos), en vez de instalarlo todo junto como en XAMPP. Cada uno vive en su propia carpeta dentro del repositorio (`nginx/`, `php/`, `src/`) para mantener el proyecto organizado.
 
 ### 2. `docker-compose.yml` — el archivo que lo organiza todo
 

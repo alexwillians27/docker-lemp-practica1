@@ -1,8 +1,8 @@
 <?php
-$host = 'db';
-$db   = 'appdb';
-$user = 'appuser';
-$pass = 'apppass';
+$host = getenv('DB_HOST') ?: 'db';
+$db   = getenv('DB_NAME') ?: 'appdb';
+$user = getenv('DB_USER') ?: 'appuser';
+$pass = getenv('DB_PASS') ?: 'apppass';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 $options = [
