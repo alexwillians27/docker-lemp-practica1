@@ -17,7 +17,6 @@ Docker, aislado y desechable.
 ```bash
 git clone <URL-de-este-repositorio>
 cd <carpeta-del-repositorio>
-cp .env.example .env        # Configurar contraseñas (o copiar desde la plantilla)
 docker compose up -d
 ```
 
@@ -32,9 +31,6 @@ correctamente.
 
 ```
 .
-├── .env                   # Variables de entorno y contraseñas (ignorado por Git)
-├── .env.example           # Plantilla pública de variables de entorno
-├── .gitignore             # Reglas de exclusión de Git (protege el .env)
 ├── docker-compose.yml     # Define los tres servicios y su conexión
 ├── php/
 │   └── Dockerfile         # Imagen PHP 8.3-FPM con extensión pdo_mysql
@@ -96,3 +92,6 @@ Fui haciendo un commit por cada pieza completada (primero el `docker-compose.yml
 
 Creé un repositorio público, lo conecté al local con `git remote add origin` y subí todo con `git push`, autenticándome con un token de acceso personal.
 
+### 9. GitIgnore
+
+Por ultimo hice un .gitIgnore para que mis contraseñas he informacion delicada no fuera publica y vulnerada.
