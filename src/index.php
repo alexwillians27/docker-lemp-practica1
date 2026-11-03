@@ -99,7 +99,7 @@ CRONICA;
     <h1><?= htmlspecialchars($nombreHeroe) ?></h1>
     <p class="subtitulo"><?= CLASE_HEROE . ', ' . ($apodo ?? 'Sin apodo') . ', Lema: ' . ($lema ?: 'Sin lema (todavía)') ?></p>
 
-    <h2>Estadísticas</h2>
+    <h2>OOOOOOOOOOOOOOOOO</h2>
     <div class="rejilla">
         <div class="stat"><div class="etq">Nivel</div><div class="val"><?= $nivelTxt ?></div></div>
         <div class="stat"><div class="etq">Vida</div><div class="val"><?= $vidaActualTxt . ' / ' . VIDA_BASE ?></div></div>
