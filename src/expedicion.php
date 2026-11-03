@@ -136,6 +136,10 @@ $hayClerigo=in_array('Clérigo', $clasesParty, true);
 // TODO 4.1  Inicializa: $oro = $oroInicial, $xpGanada = 0, $diario = [],
 //           $salasExploradas = 0.
 
+$oro=$oroInicial; //este ya esta definido en el fichero de datos
+$xpGanada=0;
+$diario=[];
+$salasExploradas=0;
 
 // TODO 4.2  foreach ($salas as $n => $sala)  con un switch sobre $sala['tipo']:
 //             'vacía'    → línea en el diario y pasar a la SIGUIENTE SALA
@@ -146,9 +150,75 @@ $hayClerigo=in_array('Clérigo', $clasesParty, true);
 //                          añádelo al inventario (+1 unidad)
 //             'descanso' → cura 'valor' (el doble si hay Clérigo), sin pasar
 //                          de $vidaMaxParty (min)
+foreach ($salas as $n=> $sala) {
+    $salasExploradas++;
+    //le sumamos 1 a $n para que ponga "sala 1", "sala 2"...
+    $numSala=$n+1;
+    $nombre=$sala['nombre'];
+    $valor=$sala['valor'];
+
+    switch ($sala['tipo']) {
+        case 'vacía':
+            $diario[]="Sala $numSala: $nombre (vacía)";
+            continue 2; //salta a la siguiente sala
+
+        case 'trampa':
+            if ($hayPicara) {
+                $diario[]="Sala $numSala: $nombre (trampa evitada por la Pícara)";
+            } else {
+                $vidaParty-=$valor;
+                $diario[]="Sala $numSala: $nombre (trampa, -$valor de vida)";
+            }
+            break;
+
+        case 'combate':
+            $danioRecibido=intdiv($valor, 4);
+            $vidaParty-=$danioRecibido;
+            $xpGanada+=$valor;
+            $diario[]="Sala $numSala: $nombre (combate, -".intdiv($valor, 4)." de vida, +$valor XP)";
+            break;
+
+        case 'tesoro':
+            $oro += $valor;
+            $textoDiario = "Sala $numSala. $nombre: +$valor mo";
+            
+            // Si la sala trae un objeto extra, se añade al inventario
+            if (isset($sala['objeto'])) {
+                $objeto = $sala['objeto'];
+                // Usamos ?? 0 por si el objeto no existía antes en nuestra mochila
+                $inventario[$objeto] = ($inventario[$objeto] ?? 0) + 1;
+                $textoDiario .= " y «" . htmlspecialchars($objeto) . "»";
+            }
+            
+            $diario[] = $textoDiario . ".";
+            break;
+
+        case 'descanso':
+            // Si hay clérigo la curación es doble
+            $curacion = $hayClerigo ? $valor * 2 : $valor;
+            $vidaParty += $curacion;
+            
+            // Limitamos con un if para no sobrepasar la vida máxima
+            if ($vidaParty > $vidaMaxParty) {
+                $vidaParty = $vidaMaxParty;
+            }
+            
+            $notaClerigo = $hayClerigo ? " (bendición del Clérigo)" : "";
+            $diario[] = "Sala $numSala. $nombre: descanso, +$curacion de vida$notaClerigo.";
+            break;
+    }
+
 // TODO 4.3  Tras el switch: si $vidaParty <= 0 → vida a 0, línea en el diario
 //           y break.
+if ($vidaParty <=0 ) {
+    $vidaParty=0;
+    $diario[]="La party ha caìdo y no puede continuar.";
+    break;
+    }
+}
+
 // TODO 4.4  $salasPendientes = salas totales − exploradas.
+$salasPendientes = count($salas) - $salasExploradas;
 
 // =====================================================================
 // R5 · EL JEFE
