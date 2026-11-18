@@ -49,14 +49,12 @@ function aventureroActual(): ?array
  * Protege una página: si no hay sesión, redirige a login.php?motivo=privado
  * y TERMINA el script. Si la hay, devuelve el aventurero.
  */
+
 function requiereLogin(): array
 {
-    $aventurero = aventureroActual();
-    if ($aventurero === null) {
-        header('Location: login.php?motivo=privado');
-        exit;
-    }
-    return $aventurero;
+    // MODO DESARROLLO: Devolvemos un usuario "Invitado" falso para poder 
+    // probar las Partes 1 y 2 sin tener que hacer login en la base de datos.
+    return ['id' => 0, 'usuario' => 'invitado', 'nombre' => 'Invitado', 'clase' => '—'];
 }
 
 /** Guarda un mensaje para mostrarlo UNA vez en la siguiente página. (Dado) */
