@@ -45,9 +45,18 @@ function aventureroActual(): ?array
  * TODO (Parte 3): ahora devuelve un invitado para que puedas hacer las
  * partes 1 y 2 sin login. Cuando llegues a la Parte 3, cámbialo.
  */
+/**
+ * Protege una página: si no hay sesión, redirige a login.php?motivo=privado
+ * y TERMINA el script. Si la hay, devuelve el aventurero.
+ */
 function requiereLogin(): array
 {
-    return ['id' => 0, 'usuario' => 'invitado', 'nombre' => 'Invitado', 'clase' => '—']; // TODO
+    $aventurero = aventureroActual();
+    if ($aventurero === null) {
+        header('Location: login.php?motivo=privado');
+        exit;
+    }
+    return $aventurero;
 }
 
 /** Guarda un mensaje para mostrarlo UNA vez en la siguiente página. (Dado) */
@@ -70,52 +79,98 @@ function leerFlash(): ?string
  */
 function temaActual(): string
 {
-    return 'claro'; // TODO
+    // Leemos la cookie. Si no existe, usamos una cadena vacía
+    $tema = $_COOKIE[COOKIE_TEMA] ?? '';
+    
+    if (in_array($tema, TEMAS, true)) {
+        return $tema;
+    }
+    return 'claro';
 }
 
 /**
  * Guarda el tema en la cookie COOKIE_TEMA durante un año.
- * TODO: setcookie con array de opciones: expires, path '/', httponly, samesite 'Lax'.
  */
 function guardarTema(string $tema): void
 {
-    // TODO
+    setcookie(COOKIE_TEMA, $tema, [
+        'expires'  => time() + (365 * 24 * 60 * 60), // 1 año en segundos
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
 }
 
 /** Guarda el NOMBRE DE USUARIO (nunca la contraseña) 30 días en COOKIE_USUARIO. */
 function recordarUsuario(string $usuario): void
 {
-    // TODO
+    setcookie(COOKIE_USUARIO, $usuario, [
+        'expires'  => time() + (30 * 24 * 60 * 60), // 30 días en segundos
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
 }
 
-/** Borra la cookie COOKIE_USUARIO (pista: caducidad en el pasado). */
+/** Borra la cookie COOKIE_USUARIO (caducidad en el pasado). */
 function olvidarUsuario(): void
 {
-    // TODO
+    setcookie(COOKIE_USUARIO, '', [
+        'expires'  => time() - 3600, // 1 hora en el pasado (se borra instantáneamente)
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
 }
 
 /**
  * Comprueba las credenciales contra la tabla `aventureros`.
- * Devuelve id, usuario, nombre y clase (SIN el hash) o null si no son correctas.
- *
- * TODO:
- *  1. Consulta preparada con un marcador :usuario. PROHIBIDO concatenar.
- *  2. Si no hay fila → null.
- *  3. password_verify($clave, $fila['password_hash']); si falla → null.
- *  4. Quita el hash del array antes de devolverlo.
- *  Pregunta para la memoria: ¿por qué el mensaje de error es el mismo si
- *  falla el usuario que si falla la contraseña?
  */
 function autenticar(PDO $pdo, string $usuario, string $clave): ?array
 {
-    return null; // TODO
+    // 1. Consulta preparada para evitar Inyección SQL
+    $stmt = $pdo->prepare("SELECT * FROM aventureros WHERE usuario = :usuario");
+    $stmt->execute([':usuario' => $usuario]);
+    $fila = $stmt->fetch();
+    
+    // 2. Si no hay fila (el usuario no existe)
+    if ($fila === false) {
+        return null;
+    }
+    
+    // 3. Verificamos la contraseña contra el hash de la base de datos
+    if (!password_verify($clave, $fila['password_hash'])) {
+        return null;
+    }
+    
+    // 4. Quitamos el hash antes de devolver el array (nunca guardes hashes en sesión)
+    unset($fila['password_hash']);
+    return $fila;
 }
+// Respuesta para tu memoria: El mensaje de error debe ser idéntico si falla el 
+// usuario o la contraseña para EVITAR LA ENUMERACIÓN DE USUARIOS. Si el sistema 
+// dijera "El usuario no existe", un atacante podría ir probando nombres hasta 
+// adivinar cuáles están registrados en el gremio.
 
 /**
- * Cierra la sesión POR COMPLETO: vacía $_SESSION, caduca la cookie de sesión
- * (session_name(), session_get_cookie_params()) y llama a session_destroy().
+ * Cierra la sesión POR COMPLETO.
  */
 function cerrarSesion(): void
 {
-    // TODO
+    $_SESSION = []; // Vaciamos los datos
+    
+    // Destruimos la cookie que guarda el PHPSESSID en el navegador
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', [
+            'expires'  => time() - 42000,
+            'path'     => $params["path"],
+            'domain'   => $params["domain"],
+            'secure'   => $params["secure"],
+            'httponly' => $params["httponly"],
+            'samesite' => $params["samesite"] ?? 'Lax'
+        ]);
+    }
+    
+    session_destroy(); // Destruimos el archivo en el servidor
 }

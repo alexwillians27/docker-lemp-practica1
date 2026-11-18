@@ -68,12 +68,20 @@ function formatearOro(int $oro): string
 
 /**
  * PARTE 2 · Filtra misiones por rango (null = todos) y recompensa mínima.
- * TODO: recorre con foreach y construye un array nuevo. No uses array_filter
- *       todavía: queremos ver el bucle.
  */
 function filtrarMisiones(array $misiones, ?string $rango, int $oroMinimo): array
 {
-    return $misiones; // TODO
+    $filtradas = [];
+    foreach ($misiones as $mision) {
+        if ($rango !== null && $mision['rango'] !== $rango) {
+            continue;
+        }
+        if ($mision['recompensa'] < $oroMinimo) {
+            continue;
+        }
+        $filtradas[] = $mision;
+    }
+    return $filtradas;
 }
 
 /**
@@ -81,34 +89,62 @@ function filtrarMisiones(array $misiones, ?string $rango, int $oroMinimo): array
  */
 function buscarMision(array $misiones, string $id): ?array
 {
-    return null; // TODO
+    foreach ($misiones as $mision) {
+        if ($mision['id'] === $id) {
+            return $mision;
+        }
+    }
+    return null;
 }
 
 /**
  * PARTE 2 · Suma la recompensa de las misiones cuyos ids se indican.
- * Reutiliza buscarMision(). Un id inexistente no suma nada.
  */
 function totalRecompensa(array $misiones, array $ids): int
 {
-    return 0; // TODO
+    $total = 0;
+    foreach ($ids as $id) {
+        $mision = buscarMision($misiones, $id);
+        if ($mision !== null) {
+            $total += $mision['recompensa'];
+        }
+    }
+    return $total;
 }
 
 /**
  * PARTE 2 · Lee el rango de $_GET['rango'] y lo valida.
- * Devuelve el rango en MAYÚSCULAS si está en RANGOS; si no viene o no es
- * válido, null. Nunca te fíes de la URL: el usuario puede escribir lo que quiera.
  */
 function leerRangoFiltro(array $get): ?string
 {
-    return null; // TODO
+    if (empty($get['rango'])) {
+        return null;
+    }
+    
+    $rango = strtoupper(trim($get['rango']));
+    
+    if (in_array($rango, RANGOS, true)) {
+        return $rango;
+    }
+    
+    return null;
 }
 
 /**
  * PARTE 2 · Lee $_GET['oro'] y lo valida como entero entre 0 y 10000.
- * Si no viene o no es válido, 0.
- * TODO: filter_var con FILTER_VALIDATE_INT y opciones min_range / max_range.
  */
 function leerOroMinimo(array $get): int
 {
-    return 0; // TODO
+    if (!isset($get['oro'])) {
+        return 0;
+    }
+
+    $oro = filter_var($get['oro'], FILTER_VALIDATE_INT, [
+        'options' => [
+            'min_range' => 0,
+            'max_range' => 10000
+        ]
+    ]);
+
+    return $oro === false ? 0 : $oro;
 }

@@ -1,11 +1,8 @@
 <?php
 /**
  * =====================================================================
- *  tablon.php · Tablón de misiones · PLANTILLA DEL ALUMNO
+ *  tablon.php · Tablón de misiones
  * =====================================================================
- *  PARTE 1 (UD3): recorrer el array de misiones y pintar cada tarjeta.
- *  PARTE 2 (UD4): filtro por GET y aceptación por POST.
- *  PARTE 3 (UD5): página solo para miembros; contador de visitas en sesión.
  */
 
 declare(strict_types=1);
@@ -22,12 +19,27 @@ $_SESSION['zurron'] ??= [];
 
 // ---- POST: aceptar una misión --------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // TODO (Parte 2):
-    //  1. Lee $_POST['id'] y busca la misión con buscarMision().
-    //  2. Si no existe → mensajeFlash('Esa misión no existe en el tablón.')
-    //  3. Si ya está en $_SESSION['zurron'] → mensaje de aviso, sin duplicar.
-    //  4. Si no → añade el id a $_SESSION['zurron'] y mensaje de confirmación.
-    //  5. Redirige (header Location + exit) para no reenviar el formulario con F5.
+    // 1. Leemos el id del formulario y buscamos la misión
+    $id = $_POST['id'] ?? '';
+    $mision = buscarMision($misiones, $id);
+
+    // 2. Si no existe en el array general
+    if ($mision === null) {
+        mensajeFlash('Esa misión no existe en el tablón.');
+    } 
+    // 3. Si ya está metida en el zurrón (sesión)
+    elseif (in_array($id, $_SESSION['zurron'], true)) {
+        mensajeFlash('Ya has aceptado esta misión anteriormente.');
+    } 
+    // 4. Si existe y no la teníamos, la añadimos al array de la sesión
+    else {
+        $_SESSION['zurron'][] = $id;
+        mensajeFlash('Misión aceptada: ' . $mision['titulo']);
+    }
+
+    // 5. Redirigimos al tablón para matar la petición POST
+    header('Location: tablon.php');
+    exit;
 }
 
 // ---- GET: filtros ---------------------------------------------------------
@@ -60,14 +72,6 @@ require __DIR__ . '/inc/cabecera.php';
 
 <p><?= count($visibles) ?> de <?= count($misiones) ?> misiones.</p>
 
-<p><?= count($visibles) ?> de <?= count($misiones) ?> misiones.</p>
-
-<?php
-/*
- * TODO (Parte 1): recorre $visibles con foreach y pinta por cada misión...
- */
-?>
-
 <div class="misiones">
 <?php if (empty($visibles)): ?>
     <p>Ninguna misión cumple el filtro.</p>
@@ -79,7 +83,6 @@ require __DIR__ . '/inc/cabecera.php';
             <h2><?= e($mision['titulo']) ?></h2>
             
             <?php 
-            // Controlamos el singular/plural de los días
             $textoDias = $mision['dias'] === 1 ? '1 día' : $mision['dias'] . ' días'; 
             ?>
             <p class="nota"><?= e($mision['zona']) ?> · <?= $textoDias ?></p>
@@ -88,7 +91,6 @@ require __DIR__ . '/inc/cabecera.php';
             
             <p class="oro"><?= formatearOro($mision['recompensa']) ?></p>
 
-            <!-- Preparación de la Parte 2: El botón de aceptar misión -->
             <?php if (in_array($mision['id'], $_SESSION['zurron'], true)): ?>
                 <p class="en-zurron">✔ En tu zurrón</p>
             <?php else: ?>

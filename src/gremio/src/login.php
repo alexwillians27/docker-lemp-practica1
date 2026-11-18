@@ -1,9 +1,8 @@
 <?php
 /**
  * =====================================================================
- *  login.php · Inicio de sesión contra MySQL · PLANTILLA DEL ALUMNO
+ *  login.php · Inicio de sesión contra MySQL
  * =====================================================================
- *  PARTE 3 · CE 4.e.1 (autenticación) · CE 4.b (sesión) · CE 4.c (cookie)
  */
 
 declare(strict_types=1);
@@ -20,23 +19,62 @@ if (aventureroActual() !== null) {
 }
 
 $error    = null;
-$usuario  = '';     // TODO: recupéralo de la cookie COOKIE_USUARIO si existe
-$recordar = false;  // TODO: marcado si había usuario recordado
+$usuario  = $_COOKIE[COOKIE_USUARIO] ?? ''; // Leemos la cookie si existe
+$recordar = isset($_COOKIE[COOKIE_USUARIO]); // Marcado si había cookie
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // TODO (Parte 3):
-    //  1. Lee usuario (con trim), clave y la casilla "recordar".
-    //  2. Si falta alguno → $error = 'Escribe tu usuario y tu contraseña.'
-    //  3. Llama a autenticar(conectar(), $usuario, $clave) dentro de try/catch
-    //     (PDOException): el detalle técnico a error_log(), al usuario un
-    //     mensaje genérico. NUNCA muestres $ex->getMessage() en pantalla.
-    //  4. Si es correcto:
-    //       session_regenerate_id(true);       ← ¿por qué? (a la memoria)
-    //       guarda el aventurero en $_SESSION['aventurero'],
-    //       inicializa $_SESSION['zurron'] y guarda la hora en $_SESSION['entrada'],
-    //       recordarUsuario() u olvidarUsuario() según la casilla,
-    //       mensajeFlash de bienvenida y redirige a tablon.php.
-    //  5. Si no → $error = 'Usuario o contraseña incorrectos.'
+    // 1. Leemos y limpiamos los campos del formulario
+    $usuarioForm = trim($_POST['usuario'] ?? '');
+    $claveForm   = $_POST['clave'] ?? '';
+    $recordar    = isset($_POST['recordar']);
+    
+    // 2. Comprobamos que no vengan vacíos
+    if ($usuarioForm === '' || $claveForm === '') {
+        $error = 'Escribe tu usuario y tu contraseña.';
+        $usuario = $usuarioForm; 
+    } else {
+        try {
+            // 3. Intentamos autenticar al usuario
+            $aventureroBD = autenticar(conectar(), $usuarioForm, $claveForm);
+            
+            // 4. Si el login es CORRECTO
+            if ($aventureroBD !== null) {
+                
+                // Respuesta para tu memoria: session_regenerate_id(true) se usa
+                // para evitar ataques de "Fijación de Sesión" (Session Fixation). 
+                // Al cambiarle el ID a la sesión justo tras loguearse, nos aseguramos
+                // de que ningún atacante que conociera el ID antiguo pueda entrar.
+                session_regenerate_id(true);       
+                
+                // Guardamos sus datos y preparamos su sesión
+                $_SESSION['aventurero'] = $aventureroBD;
+                $_SESSION['zurron'] = [];
+                $_SESSION['entrada'] = date('H:i'); // Guardamos la hora actual
+                
+                // Gestionamos la cookie de recordar
+                if ($recordar) {
+                    recordarUsuario($usuarioForm);
+                } else {
+                    olvidarUsuario();
+                }
+                
+                mensajeFlash('¡Bienvenido al gremio, ' . $aventureroBD['nombre'] . '!');
+                header('Location: tablon.php');
+                exit;
+                
+            } else {
+                // 5. Si falla la clave o el usuario
+                $error = 'Usuario o contraseña incorrectos.';
+                $usuario = $usuarioForm;
+            }
+            
+        } catch (PDOException $ex) {
+            // En caso de que se caiga la base de datos (Excepción PDO)
+            error_log('Error de BD en login: ' . $ex->getMessage());
+            $error = 'Error interno al conectar con la base de datos.';
+            $usuario = $usuarioForm;
+        }
+    }
 }
 
 $motivo = match ($_GET['motivo'] ?? '') {
