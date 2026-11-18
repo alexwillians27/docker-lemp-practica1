@@ -60,24 +60,46 @@ require __DIR__ . '/inc/cabecera.php';
 
 <p><?= count($visibles) ?> de <?= count($misiones) ?> misiones.</p>
 
-<div class="misiones">
+<p><?= count($visibles) ?> de <?= count($misiones) ?> misiones.</p>
+
 <?php
 /*
- * TODO (Parte 1): recorre $visibles con foreach y pinta por cada misión:
- *
- *   <article class="mision CLASE">            CLASE = claseRango(rango)
- *     <span class="rango">B · Experto</span>   rango · etiquetaRango(rango)
- *     <h2>Título</h2>
- *     <p class="nota">Zona · 3 días</p>        "1 día" en singular
- *     <p>Descripción</p>
- *     <p class="oro">650 mo</p>                formatearOro()
- *     ... botón "Aceptar misión" (Parte 2) o "✔ En tu zurrón" si ya está aceptada
- *   </article>
- *
- * Escapa con e() todo texto que venga de los datos.
- * El botón es un formulario POST con un <input type="hidden" name="id">.
- * Si no queda ninguna misión, muestra "Ninguna misión cumple el filtro."
+ * TODO (Parte 1): recorre $visibles con foreach y pinta por cada misión...
  */
 ?>
+
+<div class="misiones">
+<?php if (empty($visibles)): ?>
+    <p>Ninguna misión cumple el filtro.</p>
+<?php else: ?>
+    <?php foreach ($visibles as $mision): ?>
+        <article class="mision <?= claseRango($mision['rango']) ?>">
+            <span class="rango"><?= e($mision['rango']) ?> · <?= etiquetaRango($mision['rango']) ?></span>
+            
+            <h2><?= e($mision['titulo']) ?></h2>
+            
+            <?php 
+            // Controlamos el singular/plural de los días
+            $textoDias = $mision['dias'] === 1 ? '1 día' : $mision['dias'] . ' días'; 
+            ?>
+            <p class="nota"><?= e($mision['zona']) ?> · <?= $textoDias ?></p>
+            
+            <p><?= e($mision['descripcion']) ?></p>
+            
+            <p class="oro"><?= formatearOro($mision['recompensa']) ?></p>
+
+            <!-- Preparación de la Parte 2: El botón de aceptar misión -->
+            <?php if (in_array($mision['id'], $_SESSION['zurron'], true)): ?>
+                <p class="en-zurron">✔ En tu zurrón</p>
+            <?php else: ?>
+                <form method="post" action="tablon.php">
+                    <input type="hidden" name="id" value="<?= e($mision['id']) ?>">
+                    <button type="submit">Aceptar misión</button>
+                </form>
+            <?php endif; ?>
+        </article>
+    <?php endforeach; ?>
+<?php endif; ?>
 </div>
+
 <?php require __DIR__ . '/inc/pie.php'; ?>

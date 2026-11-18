@@ -25,30 +25,45 @@ function e(string $texto): string
 /**
  * PARTE 1 · Nombre del rango.
  * E Novato · D Aprendiz · C Veterano · B Experto · A Élite · S Leyenda
- * TODO: usa match. Pregunta para la memoria: ¿pones default? ¿por qué?
  */
 function etiquetaRango(string $rango): string
 {
-    return '¿?'; // TODO
+    return match ($rango) {
+        'E' => 'Novato',
+        'D' => 'Aprendiz',
+        'C' => 'Veterano',
+        'B' => 'Experto',
+        'A' => 'Élite',
+        'S' => 'Leyenda',
+        default => 'Desconocido' 
+    };
 }
+// Respuesta para tu memoria: Hemos puesto un 'default' por seguridad. Si en el futuro 
+// alguien inserta una misión con rango 'Z' en la base de datos, PHP lanzaría 
+// un error fatal si el match no tiene contemplada esa opción ni un default.
 
 /**
  * PARTE 1 · Clase CSS según dificultad.
  * E y D → 'facil' · C y B → 'media' · A y S → 'dificil'
- * TODO: usa match con varios valores por brazo.
  */
 function claseRango(string $rango): string
 {
-    return ''; // TODO
+    // El match permite agrupar varios valores por brazo separándolos con comas
+    return match ($rango) {
+        'E', 'D' => 'facil',
+        'C', 'B' => 'media',
+        'A', 'S' => 'dificil',
+        default  => ''
+    };
 }
 
 /**
  * PARTE 1 · Formatea monedas de oro: 5000 → "5.000 mo".
- * TODO: busca number_format en el manual de PHP.
  */
 function formatearOro(int $oro): string
 {
-    return $oro . ' mo'; // TODO
+    // number_format: número, decimales (0), separador decimal (','), separador de miles ('.')
+    return number_format($oro, 0, ',', '.') . ' mo';
 }
 
 /**
