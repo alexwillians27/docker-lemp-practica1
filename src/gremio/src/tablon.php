@@ -15,8 +15,6 @@ $aventurero = requiereLogin();
 $misiones   = require __DIR__ . '/inc/datos_misiones.php';
 $_SESSION['zurron'] ??= [];
 
-// TODO (Parte 3): suma 1 a $_SESSION['visitas'] en cada carga del tablón.
-
 // ---- POST: aceptar una misión --------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 1. Leemos el id del formulario y buscamos la misión
@@ -42,6 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
+// ---- Visitas de esta sesión -----------------------------------------------
+// Se cuenta una visita por cada carga real del tablón (el POST redirige).
+$_SESSION['visitas'] = ($_SESSION['visitas'] ?? 0) + 1;
+
 // ---- GET: filtros ---------------------------------------------------------
 $rango     = leerRangoFiltro($_GET);
 $oroMinimo = leerOroMinimo($_GET);
@@ -52,7 +54,10 @@ $titulo = 'Tablón de misiones';
 require __DIR__ . '/inc/cabecera.php';
 ?>
 <h1>Tablón de misiones</h1>
-<!-- TODO (Parte 3): muestra la hora de entrada y las visitas de esta sesión. -->
+<p class="nota">
+    Entrada: <?= e($_SESSION['entrada'] ?? '—') ?> ·
+    Visitas de esta sesión: <?= (int) $_SESSION['visitas'] ?>
+</p>
 <?php if ($flash !== null): ?><p class="aviso"><?= e($flash) ?></p><?php endif; ?>
 
 <form method="get" action="tablon.php" class="filtros">
