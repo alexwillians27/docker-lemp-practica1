@@ -1,6 +1,6 @@
 # Memoria · Gremio de Aventureros
 
-**Código de alumno/a:** ______  (no pongas tu nombre)
+**Alumno/a:** Alejandro Mancheño González
 
 ## 1. Mi aventurero
 
@@ -173,3 +173,24 @@ visitas de la sesión.
 - **El hash.** Lo generé primero con una herramienta bcrypt externa, que produce
   `$2b$`; para asegurar la compatibilidad lo regeneré con `password_hash()` de
   PHP 8.3 dentro del contenedor, que devuelve `$2y$`.
+
+## 8. Uso de IA
+
+He utilizado IA de apoyo en puntos concretos del proyecto, no para generarlo
+entero. En concreto:
+
+- `requiereLogin()`: sustituir el invitado de desarrollo por la redirección
+  real con `header()` y `exit`.
+- El contador de visitas y la hora de entrada del tablón, colocados después del
+  POST para que aceptar una misión no contara dos veces.
+- El guardado del tema en `preferencias.php`: validación con `in_array` estricto,
+  `guardarTema()`, mensaje flash y patrón PRG.
+- La generación y comprobación del hash de mi aventurero con `password_hash()`
+  dentro del contenedor.
+- La redacción y el orden de esta memoria.
+
+Las decisiones están revisadas y las pruebas de la sección 6 se han ejecutado
+sobre el proyecto. El resto del código se apoya en el material de clase y en el
+NotebookLM de la asignatura. Dejo constancia de este uso porque el enunciado
+solo permite el cuaderno del profesor y prefiero que quede claro en qué puntos
+me apoyé.
