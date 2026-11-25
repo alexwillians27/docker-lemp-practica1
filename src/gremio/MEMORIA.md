@@ -1,6 +1,6 @@
 # Memoria · Gremio de Aventureros
 
-**Alumno/a:** Alejandro Mancheño González
+**Código de alumno/a:** ______  (el enunciado pide el código, no el nombre)
 
 ## 1. Mi aventurero
 
