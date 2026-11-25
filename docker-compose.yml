@@ -16,10 +16,10 @@ services:
     build: ./php
     container_name: php
     environment:
-      DB_HOST: db
-      DB_NAME: ${MYSQL_DATABASE:-appdb}
-      DB_USER: ${MYSQL_USER:-appuser}
-      DB_PASS: ${MYSQL_PASSWORD:-apppass}
+      MYSQL_HOST: db
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-appdb}
+      MYSQL_USER: ${MYSQL_USER:-appuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppass}
     volumes:
       - ./src:/var/www/html
     depends_on:
