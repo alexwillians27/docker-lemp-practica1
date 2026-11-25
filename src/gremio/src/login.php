@@ -40,11 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // 4. Si el login es CORRECTO
             if ($aventureroBD !== null) {
                 
-                // Respuesta para tu memoria: session_regenerate_id(true) se usa
-                // para evitar ataques de "Fijación de Sesión" (Session Fixation). 
-                // Al cambiarle el ID a la sesión justo tras loguearse, nos aseguramos
-                // de que ningún atacante que conociera el ID antiguo pueda entrar.
-                session_regenerate_id(true);       
+                // ID nuevo tras autenticar: evita la fijación de sesión.
+                session_regenerate_id(true);
                 
                 // Guardamos sus datos y preparamos su sesión
                 $_SESSION['aventurero'] = $aventureroBD;

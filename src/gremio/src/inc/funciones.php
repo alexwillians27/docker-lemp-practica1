@@ -38,9 +38,6 @@ function etiquetaRango(string $rango): string
         default => 'Desconocido' 
     };
 }
-// Respuesta para tu memoria: Hemos puesto un 'default' por seguridad. Si en el futuro 
-// alguien inserta una misión con rango 'Z' en la base de datos, PHP lanzaría 
-// un error fatal si el match no tiene contemplada esa opción ni un default.
 
 /**
  * PARTE 1 · Clase CSS según dificultad.

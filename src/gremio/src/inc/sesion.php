@@ -142,10 +142,6 @@ function autenticar(PDO $pdo, string $usuario, string $clave): ?array
     unset($fila['password_hash']);
     return $fila;
 }
-// Respuesta para tu memoria: El mensaje de error debe ser idéntico si falla el 
-// usuario o la contraseña para EVITAR LA ENUMERACIÓN DE USUARIOS. Si el sistema 
-// dijera "El usuario no existe", un atacante podría ir probando nombres hasta 
-// adivinar cuáles están registrados en el gremio.
 
 /**
  * Cierra la sesión POR COMPLETO.
